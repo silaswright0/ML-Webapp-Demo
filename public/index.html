@@ -3,28 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>BetterForms Canvas</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #f0f0f0;
-    }
-
-    .frame {
-      border: 5px solid #333;
-      padding: 10px;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
-    canvas {
-      display: block;
-      background: #eee;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!--<div>
@@ -34,12 +13,12 @@
     <canvas id="mainCanvas" width="800" height="600"></canvas>
   </div>
   <div>
-    <input type="text" id="userInput" placeholder="Type something..." />
-    <button onclick="sendToPython()">Send</button>
+    <textarea class="inputBox" id="userInput" placeholder="Type something..."></textarea>
+    <button class="button" onclick="sendToPython()">Generate</button>
   </div>
-  <div>
+  <!--<div>
     <p id="response">hia</p>
-  </div>
+  </div>-->
 
   <script>
     const canvas = document.getElementById('mainCanvas');
