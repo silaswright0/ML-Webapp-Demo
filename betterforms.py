@@ -1,10 +1,11 @@
+import sys
 import json
-import random
 
-# You can later pull real data or use ML logic here
-response = {
-    "text": "Dynamic Canvas!",
-    "color": random.choice(["red", "green", "blue", "purple"])
-}
+# Read input from Node.js
+raw_input = sys.stdin.read()
+data = json.loads(raw_input)
+
+user_input = data.get('input', '')
+response = f'You typed: {user_input}'
 
 print(json.dumps(response))

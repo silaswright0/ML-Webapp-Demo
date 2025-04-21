@@ -27,8 +27,18 @@
   </style>
 </head>
 <body>
+  <!--<div>
+    <h2>BetterForms</h2>
+  </div>-->
   <div class="frame">
     <canvas id="mainCanvas" width="800" height="600"></canvas>
+  </div>
+  <div>
+    <input type="text" id="userInput" placeholder="Type something..." />
+    <button onclick="sendToPython()">Send</button>
+  </div>
+  <div>
+    <p id="response">hia</p>
   </div>
 
   <script>
@@ -40,11 +50,27 @@
       ctx.fillStyle = data.color || 'blue';
       ctx.font = '48px sans-serif';
       ctx.fillText(data.text || 'Hello, Canvas!', 100, 100);
+
+      fetch('/data')
+        .then(res => res.json())
+        .then(updateCanvas);
     }
 
-    fetch('/data')
+    function sendToPython() {
+      const input = document.getElementById('userInput').value;
+
+      fetch('/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ input: input })
+      })
       .then(res => res.json())
-      .then(updateCanvas);
+      .then(data => {
+        document.getElementById('response').innerText = 'Python says: ' + data.reply;
+      });
+    }
   </script>
 </body>
 </html>
