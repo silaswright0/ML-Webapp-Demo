@@ -6,9 +6,6 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!--<div>
-    <h2>BetterForms</h2>
-  </div>-->
   <div class="frame">
     <canvas id="mainCanvas" width="800" height="600"></canvas>
   </div>
@@ -16,40 +13,44 @@
     <textarea class="inputBox" id="userInput" placeholder="Type something..."></textarea>
     <button class="button" onclick="sendToPython()">Generate</button>
   </div>
-  <!--<div>
-    <p id="response">hia</p>
-  </div>-->
 
   <script>
-    const canvas = document.getElementById('mainCanvas');
-    const ctx = canvas.getContext('2d');
+          const canvas = document.getElementById('mainCanvas');
+          const ctx = canvas.getContext('2d');
 
-    function updateCanvas(data) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = data.color || 'blue';
-      ctx.font = '48px sans-serif';
-      ctx.fillText(data.text || 'Hello, Canvas!', 100, 100);
+          function sendToPython() {
+              const input = document.getElementById('userInput').value;
 
-      fetch('/data')
-        .then(res => res.json())
-        .then(updateCanvas);
-    }
+              fetch('/process', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ input: input })
+              })
+              .then(res => res.json())
+              .then(data => {
+                
+                let jsCode = data.text; 
+                console.log(jsCode);
+                // Remove any ```javascript ... ``` wrappers
+                if (jsCode.startsWith('```')) {
+                  jsCode = jsCode.replace(/^```[\w]*\s*/, '').replace(/```$/, '');
+                }
+                console.log(jsCode);
+                try {
+                  clearCanvas();//clear the canvas
+                  eval(jsCode);
+                } catch (error) {
+                  console.error("Error executing JavaScript code:", error);
+                }
+              })
+              .catch(error => console.error('Error:', error));
+            }
 
-    function sendToPython() {
-      const input = document.getElementById('userInput').value;
-
-      fetch('/process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ input: input })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('response').innerText = 'Python says: ' + data.reply;
-      });
-    }
+            function clearCanvas(){
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
   </script>
 </body>
 </html>

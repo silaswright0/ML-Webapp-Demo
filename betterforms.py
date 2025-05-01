@@ -3,9 +3,10 @@ import json
 import os
 import requests
 
-API_KEY = "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"
+API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 HISTORY_FILE = "inputhistory.json"
+RESPONSES_FILE = "responseshistory.json"
 
 headers = {
     "Authorization": f"Bearer {API_KEY}",
@@ -20,6 +21,14 @@ if os.path.exists(HISTORY_FILE):
             history = json.load(f)
     except json.JSONDecodeError:
         history = []
+        
+responses = []
+if os.path.exists(RESPONSES_FILE):
+    try:
+        with open(RESPONSES_FILE, 'r') as f:
+            responses = json.load(f)
+    except json.JSONDecodeError:
+        responses = []
 
 # Read input from stdin
 try:
@@ -43,13 +52,31 @@ try:
 except Exception as e:
     print(f"Error saving history: {str(e)}", file=sys.stderr)
 
+messages = [
+    {"role": "system", "content": """You are a helpful assistant. Based on user input, generate only JavaScript code that draws onto the HTML canvas below. 
+                                            Do not add any HTML, explanations, or extra text. Only generate JavaScript code. The canvas is already defined as:
+                                            <div class="frame">
+                                            <canvas id="mainCanvas" width="800" height="600"></canvas>
+                                            </div>
+                                            Assume you have access to the canvas context (ctx) already initialized as:
+                                            const ctx = document.getElementById('mainCanvas').getContext('2d');
+    """}
+]
+#add to message list
+for i,entry in enumerate(history):
+    messages.append({"role": "user", "content": entry["input"]})
+    #print(entry["input"],file=sys.stderr)
+    if i < len(responses):
+        responseContent = responses[i]['response']['choices'][0]['message']['content']
+        messages.append({"role": "assistant", "content": responseContent})
+        #print(responses[i]["response"],file=sys.stderr)
+
+#print(messages,file=sys.stderr)
+
 # Prepare payload
 payload = {
     "model": "gemma2-9b-it",
-    "messages": [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": user_input}
-    ],
+    "messages": messages,
     "temperature": 0.7,
     "max_tokens": 1024
 }
@@ -62,8 +89,9 @@ try:
     response = requests.post(GROQ_API_URL, headers=headers, json=payload)
     response.raise_for_status()
     result = response.json()
-    print(result["choices"][0]["message"]["content"])
-    print(result["choices"][0]["message"]["content"],file=sys.stderr)
+    responses.append({'response':result})
+    #print(result["choices"][0]["message"]["content"],file=sys.stderr)
+    print(json.dumps({"text": result["choices"][0]["message"]["content"]}))
 except requests.exceptions.RequestException as e:
     print(json.dumps({
         "error": str(e),
@@ -72,3 +100,10 @@ except requests.exceptions.RequestException as e:
         "response_text": getattr(e.response, 'text', '')
     }), file=sys.stderr)
     sys.exit(1)
+
+#save responses
+try:
+    with open(RESPONSES_FILE, 'w') as f:
+        json.dump(responses, f, indent=2)
+except Exception as e:
+    print(f"Error saving responses: {str(e)}", file=sys.stderr)

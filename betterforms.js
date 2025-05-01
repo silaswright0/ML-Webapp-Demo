@@ -1,17 +1,3 @@
-//check if we alr have the input history file if so delete it
-/*const fs = require('fs');
-const path1 = require('path');
-
-const filePath = path1.join(__dirname, 'input_history.json');
-
-
-if (fs.existsSync(filePath)) {
-  fs.unlinkSync(filePath); 
-  console.log('File deleted.');
-} else {
-  console.log('No file to delete.');
-}*/
-
 //then get to server business
 const express = require('express');
 const { spawn } = require('child_process');
@@ -41,7 +27,6 @@ app.get('/data', (req, res) => {
 });
 
 app.post('/process', (req, res) => {
-  const { spawn } = require('child_process');
   const py = spawn('python', ['betterforms.py']);
 
   let dataToSend = '';
@@ -54,8 +39,18 @@ app.post('/process', (req, res) => {
     console.error(`stderr: ${err}`);
   });
 
-  py.on('close', () => {
-    res.json({ reply: dataToSend });
+  py.on('close', (code) => {
+    if (code !== 0) {
+      return res.status(500).json({ error: 'Python script failed to execute correctly' });
+    }
+
+    try {
+      const parsedData = JSON.parse(dataToSend);
+      res.json(parsedData);  // Send the valid JSON back
+    } catch (e) {
+      console.error('Failed to parse data:', e);
+      res.status(500).send('Invalid data from Python');
+    }
   });
 
   // Send input from user to Python
