@@ -2,6 +2,7 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
@@ -9,22 +10,18 @@ const PORT = 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-app.get('/data', (req, res) => {
-  const py = spawn('python', ['betterforms.py']);
+//delete message context if it exists
+function clearHistory() {
+  const files = ['inputhistory.json', 'responseshistory.json'];
 
-  let data = '';
-  py.stdout.on('data', chunk => data += chunk);
-
-  py.stderr.on('data', err => console.error(`Python error: ${err}`));
-
-  py.on('close', () => {
-    try {
-      res.json(JSON.parse(data));
-    } catch (e) {
-      res.status(500).send('Invalid data from Python');
+  files.forEach(file => {
+    const filePath = path.join(__dirname, file);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`Deleted: ${file}`);
     }
   });
-});
+}
 
 app.post('/process', (req, res) => {
   const py = spawn('python', ['betterforms.py']);
@@ -59,5 +56,6 @@ app.post('/process', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  clearHistory()
   console.log(`Server running at http://localhost:${PORT}`);
 });

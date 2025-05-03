@@ -35,7 +35,7 @@
                 console.log(jsCode);
                 // Remove any ```javascript ... ``` wrappers
                 if (jsCode.startsWith('```')) {
-                  jsCode = jsCode.replace(/^```[\w]*\s*/, '').replace(/```$/, '');
+                  jsCode = jsCode.replace(/^```[\w]*\s*/, '').replace(/```[\s\S]*$/, '');
                 }
                 console.log(jsCode);
                 try {

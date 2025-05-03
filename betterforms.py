@@ -3,10 +3,13 @@ import json
 import os
 import requests
 
-API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 HISTORY_FILE = "inputhistory.json"
 RESPONSES_FILE = "responseshistory.json"
+API_KEY = os.getenv("GROQ_API_KEY")
+if not API_KEY:
+    raise EnvironmentError("Missing required environment variable: GROQ_API_KEY\n****************\n\nTry: set GROQ_API_KEY=yourapikey\n\n" \
+    "Free api keys available at: https://console.groq.com/keys\n\n: )")
 
 headers = {
     "Authorization": f"Bearer {API_KEY}",
