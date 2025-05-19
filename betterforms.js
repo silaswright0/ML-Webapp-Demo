@@ -56,6 +56,6 @@ app.post('/process', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  clearHistory()
+  clearHistory();
   console.log(`Server running at http://localhost:${PORT}`);
 });
