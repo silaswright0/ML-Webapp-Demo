@@ -38,6 +38,7 @@
                   jsCode = jsCode.replace(/^```[\w]*\s*/, '').replace(/```[\s\S]*$/, '');
                 }
                 console.log(jsCode);
+
                 try {
                   clearCanvas();//clear the canvas
                   eval(jsCode);
@@ -53,10 +54,10 @@
             }
 
             function updateCanvas(data) {
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              clearCanvas()
               ctx.fillStyle = data.color || 'blue';
               ctx.font = '18px sans-serif';
-              ctx.fillText(data.text || 'Hello, Canvas!', 100, 100);
+              ctx.fillText(data.text || 'Hello, World!', 100, 100);
             }
 
             function clearCanvas(){
